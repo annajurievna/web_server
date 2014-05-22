@@ -25,7 +25,8 @@
 #include <dirent.h>
 #include <pwd.h>
 
-int BACKLOG = 10;
+const int BACKLOG = 10;
+
 
 const char OK[] = "\
 HTTP/1.1 200 Ok\r\n\
@@ -36,6 +37,13 @@ Content-Type: text/html; charset=UTF-8\r\n\r\n";
 const char BEGIN[] = "<html><body style=\"font-family:Courier New\">";
 const char END[] = "</body></html>";
 
+int check_path (char path[]) {
+    if (strstr(path, "..") != NULL) {
+        printf("found .. in %s\n", path);
+        return 0;
+    }
+    return 1;
+}
 
 void PrintInfo(char path[], char * buf) {
     struct stat s;
@@ -276,6 +284,13 @@ void Connection(int sd) {
     strcpy(path, ans);
     free(ans);
     printf("%s\n", path);
+
+    printf("path: %s\n", path + 1);
+
+    if ( check_path(path) == 0 ) {
+        printf("Incorrect input\n");
+        exit(3);
+    }
 
     struct stat path_info;
     if (stat(path, &path_info) == -1) {
